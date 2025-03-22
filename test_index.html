@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI leaseContract</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://threejs.org/examples/jsm/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/8.4.0/mocha.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.3.4/chai.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/8.4.0/mocha.min.css">
+    <style>
+        /* Additional styles for testing */
+        #mocha {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="mocha"></div>
+    <script>
+        mocha.setup('bdd');
+        const { expect } = chai;
+
+        describe('AI Lease DApp', function() {
+            it('should connect to wallet', async function() {
+                const connectWalletButton = document.createElement('button');
+                connectWalletButton.id = 'connectWalletButton';
+                document.body.appendChild(connectWalletButton);
+
+                window.ethereum = {
+                    request: async ({ method }) => {
+                        if (method === 'eth_requestAccounts') {
+                            return ['0x1234567890abcdef'];
+                        }
+                    }
+                };
+
+                connectWalletButton.click();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // wait for async operations
+
+                expect(window.alert).to.have.been.calledWith('Connected to: 0x1234567890abcdef');
+            });
+
+            it('should lease model', async function() {
+                const leaseModelButton = document.createElement('button');
+                leaseModelButton.id = 'leaseModelButton';
+                document.body.appendChild(leaseModelButton);
+
+                window.ethereum = {
+                    request: async ({ method }) => {
+                        if (method === 'eth_requestAccounts') {
+                            return ['0x1234567890abcdef'];
+                        }
+                    }
+                };
+
+                window.prompt = (message) => {
+                    if (message.includes('model ID')) return '1';
+                    if (message.includes('lease duration')) return '3600';
+                    if (message.includes('lease price')) return '0.1';
+                };
+
+                const leaseModel = async (tokenId, duration, price, from) => {
+                    expect(tokenId).to.equal('1');
+                    expect(duration).to.equal('3600');
+                    expect(price).to.equal('0.1');
+                    expect(from).to.equal('0x1234567890abcdef');
+                    return { hash: '0xabcdef' };
+                };
+
+                leaseModelButton.click();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // wait for async operations
+
+                expect(window.alert).to.have.been.calledWith('Lease transaction sent: 0xabcdef');
+            });
+        });
+
+        mocha.run();
+    </script>
+</body>
+</html>
